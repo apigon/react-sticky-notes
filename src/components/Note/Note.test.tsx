@@ -1,23 +1,33 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Note } from './Note';
+import { NotesProvider } from '../../context/NotesProvider';
+import { Canvas } from '../Canvas/Canvas';
 import type { Note as NoteType } from '../../types';
 
-describe('Note', () => {
-  const mockNote: NoteType = {
-    id: 'test-note-1',
-    content: 'Test content',
-    position: { x: 100, y: 200 },
-    size: { width: 200, height: 150 },
-  };
+const mockNote: NoteType = {
+  id: 'test-note-1',
+  content: 'Test content',
+  position: { x: 100, y: 200 },
+  size: { width: 200, height: 150 },
+};
 
+const renderNote = (note: NoteType = mockNote) => {
+  return render(
+    <NotesProvider>
+      <Note note={note} />
+    </NotesProvider>
+  );
+};
+
+describe('Note', () => {
   it('renders with content', () => {
-    render(<Note note={mockNote} onUpdate={vi.fn()} />);
+    renderNote();
     const textarea = screen.getByTestId('note-content');
     expect(textarea).toHaveValue('Test content');
   });
 
   it('renders at correct position and size', () => {
-    render(<Note note={mockNote} onUpdate={vi.fn()} />);
+    renderNote();
     const note = screen.getByTestId('note');
     expect(note).toHaveStyle({
       left: '100px',
@@ -28,21 +38,27 @@ describe('Note', () => {
   });
 
   it('is draggable', () => {
-    render(<Note note={mockNote} onUpdate={vi.fn()} />);
+    renderNote();
     const note = screen.getByTestId('note');
     expect(note).toHaveAttribute('draggable', 'true');
   });
 
-  it('calls onUpdate when content changes', () => {
-    const onUpdate = vi.fn();
-    render(<Note note={mockNote} onUpdate={onUpdate} />);
+  it('updates content when changed', () => {
+    // Test with full integration through Canvas
+    render(
+      <NotesProvider>
+        <Canvas />
+      </NotesProvider>
+    );
+    const canvas = screen.getByTestId('canvas');
+
+    // Create a note by clicking on canvas
+    fireEvent.click(canvas, { clientX: 100, clientY: 200 });
 
     const textarea = screen.getByTestId('note-content');
     fireEvent.change(textarea, { target: { value: 'New content' } });
 
-    expect(onUpdate).toHaveBeenCalledWith('test-note-1', {
-      content: 'New content',
-    });
+    expect(textarea).toHaveValue('New content');
   });
 
   it('sets drag data on drag start', () => {
@@ -59,7 +75,7 @@ describe('Note', () => {
       toJSON: () => ({}),
     }));
 
-    render(<Note note={mockNote} onUpdate={vi.fn()} />);
+    renderNote();
     const note = screen.getByTestId('note');
     const setData = vi.fn();
 
@@ -81,7 +97,7 @@ describe('Note', () => {
 
   it('renders with placeholder when content is empty', () => {
     const emptyNote = { ...mockNote, content: '' };
-    render(<Note note={emptyNote} onUpdate={vi.fn()} />);
+    renderNote(emptyNote);
     const textarea = screen.getByTestId('note-content');
     expect(textarea).toHaveAttribute('placeholder', 'Type your note...');
   });

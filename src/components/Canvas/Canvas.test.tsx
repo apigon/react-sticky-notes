@@ -1,14 +1,23 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Canvas } from './Canvas';
+import { NotesProvider } from '../../context/NotesProvider';
+
+const renderCanvas = () => {
+  return render(
+    <NotesProvider>
+      <Canvas />
+    </NotesProvider>
+  );
+};
 
 describe('Canvas', () => {
   it('renders empty canvas', () => {
-    render(<Canvas />);
+    renderCanvas();
     expect(screen.getByTestId('canvas')).toBeInTheDocument();
   });
 
   it('creates note on click', () => {
-    render(<Canvas />);
+    renderCanvas();
     const canvas = screen.getByTestId('canvas');
 
     fireEvent.click(canvas, { clientX: 100, clientY: 200 });
@@ -17,7 +26,7 @@ describe('Canvas', () => {
   });
 
   it('creates multiple notes on multiple clicks', () => {
-    render(<Canvas />);
+    renderCanvas();
     const canvas = screen.getByTestId('canvas');
 
     fireEvent.click(canvas, { clientX: 100, clientY: 100 });
@@ -27,7 +36,7 @@ describe('Canvas', () => {
   });
 
   it('does not create note when clicking on existing note', () => {
-    render(<Canvas />);
+    renderCanvas();
     const canvas = screen.getByTestId('canvas');
 
     fireEvent.click(canvas, { clientX: 100, clientY: 100 });
@@ -38,7 +47,7 @@ describe('Canvas', () => {
   });
 
   it('renders trash zone', () => {
-    render(<Canvas />);
+    renderCanvas();
     expect(screen.getByTestId('trash-zone')).toBeInTheDocument();
   });
 });
