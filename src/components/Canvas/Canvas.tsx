@@ -1,35 +1,11 @@
-import { useState, useCallback } from 'react';
 import type { MouseEvent } from 'react';
-import type { Note as NoteType, Position } from '../../types';
+import { useNotes } from '../../hooks/useNotes';
 import { Note } from '../Note/Note';
 import { TrashZone } from '../TrashZone/TrashZone';
 import styles from './Canvas.module.css';
 
-const DEFAULT_WIDTH = 200;
-const DEFAULT_HEIGHT = 150;
-
 export function Canvas() {
-  const [notes, setNotes] = useState<NoteType[]>([]);
-
-  const addNote = useCallback((position: Position) => {
-    const newNote: NoteType = {
-      id: crypto.randomUUID(),
-      content: '',
-      position,
-      size: { width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT },
-    };
-    setNotes((prev) => [...prev, newNote]);
-  }, []);
-
-  const updateNote = useCallback((id: string, updates: Partial<NoteType>) => {
-    setNotes((prev) =>
-      prev.map((note) => (note.id === id ? { ...note, ...updates } : note))
-    );
-  }, []);
-
-  const deleteNote = useCallback((id: string) => {
-    setNotes((prev) => prev.filter((note) => note.id !== id));
-  }, []);
+  const { notes, addNote, updateNote } = useNotes();
 
   const handleClick = (e: MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
@@ -66,9 +42,9 @@ export function Canvas() {
       data-testid="canvas"
     >
       {notes.map((note) => (
-        <Note key={note.id} note={note} onUpdate={updateNote} />
+        <Note key={note.id} note={note} />
       ))}
-      <TrashZone onDelete={deleteNote} />
+      <TrashZone />
     </div>
   );
 }

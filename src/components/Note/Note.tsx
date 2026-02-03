@@ -1,13 +1,15 @@
 import type { DragEvent, ChangeEvent } from "react";
 import type { Note as NoteType } from "../../types";
+import { useNotes } from "../../hooks/useNotes";
 import styles from "./Note.module.css";
 
 interface NoteProps {
   note: NoteType;
-  onUpdate: (id: string, updates: Partial<NoteType>) => void;
 }
 
-export function Note({ note, onUpdate }: NoteProps) {
+export function Note({ note }: NoteProps) {
+  const { updateNote } = useNotes();
+
   const handleDragStart = (e: DragEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     e.dataTransfer.setData("text/plain", note.id);
@@ -17,7 +19,7 @@ export function Note({ note, onUpdate }: NoteProps) {
   };
 
   const handleContentChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    onUpdate(note.id, { content: e.target.value });
+    updateNote(note.id, { content: e.target.value });
   };
 
   return (

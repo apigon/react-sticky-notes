@@ -1,11 +1,9 @@
 import { useState } from 'react';
+import { useNotes } from '../../hooks/useNotes';
 import styles from './TrashZone.module.css';
 
-interface TrashZoneProps {
-  onDelete: (id: string) => void;
-}
-
-export function TrashZone({ onDelete }: TrashZoneProps) {
+export function TrashZone() {
+  const { deleteNote } = useNotes();
   const [isOver, setIsOver] = useState(false);
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -22,7 +20,7 @@ export function TrashZone({ onDelete }: TrashZoneProps) {
     setIsOver(false);
     const noteId = e.dataTransfer.getData('text/plain');
     if (noteId) {
-      onDelete(noteId);
+      deleteNote(noteId);
     }
   };
 
