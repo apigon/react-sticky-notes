@@ -1,0 +1,34 @@
+.trashZone {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 16px 32px;
+  background-color: #f5f5f5;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  z-index: 100;
+}
+
+.trashZone.active {
+  background-color: #ffebee;
+  border-color: #f44336;
+  transform: translateX(-50%) scale(1.1);
+}
+
+.icon {
+  font-size: 24px;
+}
+
+.label {
+  font-size: 14px;
+  color: #666;
+}
+
+.trashZone.active .label {
+  color: #f44336;
+}
