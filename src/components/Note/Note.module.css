@@ -4,13 +4,22 @@
   border: 1px solid #f9a825;
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  cursor: grab;
   display: flex;
   flex-direction: column;
   padding: 10px;
+  z-index: 10;
 }
 
-.note:active {
+.noteHeader {
+  height: 24px;
+  cursor: grab;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.05), transparent);
+  border-radius: 4px 4px 0 0;
+  margin: -10px -10px 8px -10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.noteHeader:active {
   cursor: grabbing;
 }
 

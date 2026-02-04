@@ -1,35 +1,15 @@
-import { useState } from 'react';
-import { useNotes } from '../../hooks/useNotes';
-import styles from './TrashZone.module.css';
+import { useNotes } from "../../hooks/useNotes";
+import styles from "./TrashZone.module.css";
 
 export function TrashZone() {
-  const { deleteNote } = useNotes();
-  const [isOver, setIsOver] = useState(false);
+  const { draggingNoteId, trashZoneRef, isOverTrash } = useNotes();
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsOver(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsOver(false);
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsOver(false);
-    const noteId = e.dataTransfer.getData('text/plain');
-    if (noteId) {
-      deleteNote(noteId);
-    }
-  };
+  const isActive = draggingNoteId !== null && isOverTrash;
 
   return (
     <div
-      className={`${styles.trashZone} ${isOver ? styles.active : ''}`}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
+      ref={trashZoneRef}
+      className={`${styles.trashZone} ${isActive ? styles.active : ""}`}
       data-testid="trash-zone"
     >
       <span className={styles.icon}>🗑️</span>

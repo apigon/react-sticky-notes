@@ -1,4 +1,4 @@
-import { useState, useCallback, type ReactNode } from "react";
+import { useState, useCallback, useRef, type ReactNode } from "react";
 import type { Note, Position } from "../types";
 import { NotesContext } from "./NotesContext";
 
@@ -11,6 +11,9 @@ interface NotesProviderProps {
 
 export function NotesProvider({ children }: NotesProviderProps) {
   const [notes, setNotes] = useState<Note[]>([]);
+  const [draggingNoteId, setDraggingNoteId] = useState<string | null>(null);
+  const [isOverTrash, setIsOverTrash] = useState(false);
+  const trashZoneRef = useRef<HTMLDivElement | null>(null);
 
   const addNote = useCallback((position: Position) => {
     const newNote: Note = {
@@ -33,7 +36,19 @@ export function NotesProvider({ children }: NotesProviderProps) {
   }, []);
 
   return (
-    <NotesContext.Provider value={{ notes, addNote, updateNote, deleteNote }}>
+    <NotesContext.Provider
+      value={{
+        notes,
+        addNote,
+        updateNote,
+        deleteNote,
+        draggingNoteId,
+        setDraggingNoteId,
+        trashZoneRef,
+        isOverTrash,
+        setIsOverTrash,
+      }}
+    >
       {children}
     </NotesContext.Provider>
   );

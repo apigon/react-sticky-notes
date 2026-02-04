@@ -37,12 +37,6 @@ describe("Note", () => {
     });
   });
 
-  it("is draggable", () => {
-    renderNote();
-    const note = screen.getByTestId("note");
-    expect(note).toHaveAttribute("draggable", "true");
-  });
-
   it("updates content when changed", () => {
     // Test with full integration through Canvas
     render(
@@ -61,39 +55,28 @@ describe("Note", () => {
     expect(textarea).toHaveValue("New content");
   });
 
-  it("sets drag data on drag start", () => {
-    const originalGetBoundingClientRect =
-      Element.prototype.getBoundingClientRect;
-    Element.prototype.getBoundingClientRect = vi.fn(() => ({
-      left: 100,
-      top: 200,
-      right: 300,
-      bottom: 350,
-      width: 200,
-      height: 150,
-      x: 100,
-      y: 200,
-      toJSON: () => ({}),
-    }));
+  it("moves note on mouse drag", () => {
+    render(
+      <NotesProvider>
+        <Canvas />
+      </NotesProvider>,
+    );
+    const canvas = screen.getByTestId("canvas");
+    fireEvent.click(canvas, { clientX: 100, clientY: 100 });
 
-    renderNote();
     const note = screen.getByTestId("note");
-    const setData = vi.fn();
+    const dragHandle = screen.getByTestId("note-header");
+    const initialLeft = parseInt(note.style.left);
+    const initialTop = parseInt(note.style.top);
 
-    const dragStartEvent = new Event("dragstart", { bubbles: true });
-    Object.defineProperty(dragStartEvent, "clientX", { value: 120 });
-    Object.defineProperty(dragStartEvent, "clientY", { value: 220 });
-    Object.defineProperty(dragStartEvent, "dataTransfer", {
-      value: { setData, effectAllowed: "move" },
-    });
+    fireEvent.mouseDown(dragHandle, { clientX: 120, clientY: 120 });
+    fireEvent.mouseMove(document, { clientX: 170, clientY: 170 });
+    fireEvent.mouseUp(document);
 
-    note.dispatchEvent(dragStartEvent);
-
-    expect(setData).toHaveBeenCalledWith("text/plain", "test-note-1");
-    expect(setData).toHaveBeenCalledWith("offsetX", "20");
-    expect(setData).toHaveBeenCalledWith("offsetY", "20");
-
-    Element.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+    const newLeft = parseInt(note.style.left);
+    const newTop = parseInt(note.style.top);
+    expect(newLeft).toBe(initialLeft + 50);
+    expect(newTop).toBe(initialTop + 50);
   });
 
   it("renders with placeholder when content is empty", () => {
