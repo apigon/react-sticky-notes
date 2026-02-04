@@ -1,7 +1,7 @@
 import type { MouseEvent } from "react";
 import { useNotes } from "../../hooks/useNotes";
 import { Note } from "./components/Note";
-import { TrashZone } from "../TrashZone/TrashZone";
+import { DeleteZone } from "../DeleteZone/DeleteZone";
 import styles from "./Canvas.module.css";
 
 export function Canvas() {
@@ -19,7 +19,7 @@ export function Canvas() {
       {notes.map((note) => (
         <Note key={note.id} note={note} />
       ))}
-      <TrashZone />
+      <DeleteZone />
     </div>
   );
 }

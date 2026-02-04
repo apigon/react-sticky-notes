@@ -1,7 +1,7 @@
 import { useNotes } from "../../hooks/useNotes";
-import styles from "./TrashZone.module.css";
+import styles from "./DeleteZone.module.css";
 
-export function TrashZone() {
+export function DeleteZone() {
   const {
     draggingNoteId,
     deleteZoneRef: deleteZoneRef,
