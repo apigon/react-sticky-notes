@@ -52,15 +52,15 @@ describe("NoteHeader", () => {
     expect(screen.queryByTestId("note")).not.toBeInTheDocument();
   });
 
-  it("initiates drag when header mousedown", () => {
+  it("initiates drag when header pointerdown", () => {
     renderWithNote();
     const note = screen.getByTestId("note");
     const header = screen.getByTestId("note-header");
     const initialLeft = parseInt(note.style.left);
 
-    fireEvent.mouseDown(header, { clientX: 120, clientY: 120 });
-    fireEvent.mouseMove(document, { clientX: 170, clientY: 120 });
-    fireEvent.mouseUp(document);
+    fireEvent.pointerDown(header, { clientX: 120, clientY: 120, pointerId: 1 });
+    fireEvent.pointerMove(header, { clientX: 170, clientY: 120, pointerId: 1 });
+    fireEvent.pointerUp(header, { pointerId: 1 });
 
     expect(parseInt(note.style.left)).toBe(initialLeft + 50);
   });

@@ -57,9 +57,21 @@ describe("TrashZone", () => {
 
     // Drag note to trash zone
     const dragHandle = screen.getByTestId("note-header");
-    fireEvent.mouseDown(dragHandle, { clientX: 100, clientY: 100 });
-    fireEvent.mouseMove(document, { clientX: 550, clientY: 550 });
-    fireEvent.mouseUp(document, { clientX: 550, clientY: 550 });
+    fireEvent.pointerDown(dragHandle, {
+      clientX: 100,
+      clientY: 100,
+      pointerId: 1,
+    });
+    fireEvent.pointerMove(dragHandle, {
+      clientX: 550,
+      clientY: 550,
+      pointerId: 1,
+    });
+    fireEvent.pointerUp(dragHandle, {
+      clientX: 550,
+      clientY: 550,
+      pointerId: 1,
+    });
 
     // Note should be deleted
     expect(screen.queryByTestId("note")).not.toBeInTheDocument();

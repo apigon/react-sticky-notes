@@ -1,4 +1,4 @@
-import { useRef, type ChangeEvent, type MouseEvent } from "react";
+import { useRef, type ChangeEvent, type PointerEvent } from "react";
 import type { Note as NoteType } from "../../../../types";
 import { useNotes } from "../../../../hooks/useNotes";
 import { NoteHeader } from "./components/NoteHeader";
@@ -18,20 +18,23 @@ export function Note({ note }: NoteProps) {
   const { updateNote, bringToFront, setDraggingNoteId } = useNotes();
   const noteRef = useRef<HTMLDivElement>(null);
   const isResizing = useRef(false);
+  const resizeState = useRef<ResizeState | null>(null);
 
   const handleContentChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     updateNote(note.id, { content: e.target.value });
   };
 
-  const handleResizeStart =
-    (direction: ResizeDirection) => (e: MouseEvent<HTMLDivElement>) => {
+  const handleResizePointerDown =
+    (direction: ResizeDirection) => (e: PointerEvent<HTMLDivElement>) => {
       e.preventDefault();
       e.stopPropagation();
+      e.currentTarget.setPointerCapture(e.pointerId);
+
       isResizing.current = true;
       setDraggingNoteId(note.id);
       bringToFront(note.id);
 
-      const resizeState: ResizeState = {
+      resizeState.current = {
         startX: e.clientX,
         startY: e.clientY,
         startWidth: note.size.width,
@@ -43,26 +46,28 @@ export function Note({ note }: NoteProps) {
         resizesEast: direction.includes("e"),
         resizesWest: direction.includes("w"),
       };
-
-      const handleMouseMove = (moveEvent: globalThis.MouseEvent) => {
-        const result = calculateResize(
-          resizeState,
-          moveEvent.clientX,
-          moveEvent.clientY,
-        );
-        updateNote(note.id, result);
-      };
-
-      const handleMouseUp = () => {
-        isResizing.current = false;
-        setDraggingNoteId(null);
-        document.removeEventListener("mousemove", handleMouseMove);
-        document.removeEventListener("mouseup", handleMouseUp);
-      };
-
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
     };
+
+  const handleResizePointerMove = (e: PointerEvent<HTMLDivElement>) => {
+    if (!isResizing.current || !resizeState.current) return;
+
+    const result = calculateResize(resizeState.current, e.clientX, e.clientY);
+    updateNote(note.id, result);
+  };
+
+  const handleResizePointerUp = () => {
+    if (!isResizing.current) return;
+
+    isResizing.current = false;
+    resizeState.current = null;
+    setDraggingNoteId(null);
+  };
+
+  const resizeHandleProps = (direction: ResizeDirection) => ({
+    onPointerDown: handleResizePointerDown(direction),
+    onPointerMove: handleResizePointerMove,
+    onPointerUp: handleResizePointerUp,
+  });
 
   return (
     <div
@@ -94,19 +99,19 @@ export function Note({ note }: NoteProps) {
         data-testid="note-content"
       />
       {/* Edge resize zones */}
-      <div className={styles.resizeN} onMouseDown={handleResizeStart("n")} />
-      <div className={styles.resizeS} onMouseDown={handleResizeStart("s")} />
-      <div className={styles.resizeE} onMouseDown={handleResizeStart("e")} />
-      <div className={styles.resizeW} onMouseDown={handleResizeStart("w")} />
+      <div className={styles.resizeN} {...resizeHandleProps("n")} />
+      <div className={styles.resizeS} {...resizeHandleProps("s")} />
+      <div className={styles.resizeE} {...resizeHandleProps("e")} />
+      <div className={styles.resizeW} {...resizeHandleProps("w")} />
       {/* Corner resize zones */}
-      <div className={styles.resizeNE} onMouseDown={handleResizeStart("ne")} />
-      <div className={styles.resizeNW} onMouseDown={handleResizeStart("nw")} />
+      <div className={styles.resizeNE} {...resizeHandleProps("ne")} />
+      <div className={styles.resizeNW} {...resizeHandleProps("nw")} />
       <div
         className={styles.resizeSE}
-        onMouseDown={handleResizeStart("se")}
+        {...resizeHandleProps("se")}
         data-testid="resize-handle"
       />
-      <div className={styles.resizeSW} onMouseDown={handleResizeStart("sw")} />
+      <div className={styles.resizeSW} {...resizeHandleProps("sw")} />
     </div>
   );
 }

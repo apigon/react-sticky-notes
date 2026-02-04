@@ -1,4 +1,9 @@
-import type { MouseEvent, RefObject } from "react";
+import {
+  useRef,
+  type PointerEvent,
+  type MouseEvent,
+  type RefObject,
+} from "react";
 import type { NoteColor } from "../../../../../../types";
 import { useNotes } from "../../../../../../hooks/useNotes";
 import { NOTE_COLORS, COLOR_ORDER } from "../../colors";
@@ -28,53 +33,58 @@ export function NoteHeader({
     setIsOverTrash,
   } = useNotes();
 
-  const handleDragStart = (e: MouseEvent<HTMLDivElement>) => {
-    if (isResizing.current) {
-      return;
-    }
+  const isDragging = useRef(false);
+  const dragStart = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
 
-    e.preventDefault();
-    setDraggingNoteId(noteId);
-    bringToFront(noteId);
+  const handlePointerDown = (e: PointerEvent<HTMLDivElement>) => {
+    if (isResizing.current) return;
 
     const note = notes.find((n) => n.id === noteId);
     if (!note) return;
 
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const startPosX = note.position.x;
-    const startPosY = note.position.y;
+    e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    isDragging.current = true;
 
-    const handleMouseMove = (moveEvent: globalThis.MouseEvent) => {
-      const deltaX = moveEvent.clientX - startX;
-      const deltaY = moveEvent.clientY - startY;
-
-      updateNote(noteId, {
-        position: {
-          x: startPosX + deltaX,
-          y: startPosY + deltaY,
-        },
-      });
-
-      setIsOverTrash(checkDeleteZoneIntersection(noteRef, deleteZoneRef));
+    dragStart.current = {
+      x: e.clientX,
+      y: e.clientY,
+      posX: note.position.x,
+      posY: note.position.y,
     };
 
-    const handleMouseUp = () => {
-      const shouldDelete = checkDeleteZoneIntersection(noteRef, deleteZoneRef);
+    setDraggingNoteId(noteId);
+    bringToFront(noteId);
+  };
 
-      setDraggingNoteId(null);
-      setIsOverTrash(false);
+  const handlePointerMove = (e: PointerEvent<HTMLDivElement>) => {
+    if (!isDragging.current) return;
 
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
+    const deltaX = e.clientX - dragStart.current.x;
+    const deltaY = e.clientY - dragStart.current.y;
 
-      if (shouldDelete) {
-        deleteNote(noteId);
-      }
-    };
+    updateNote(noteId, {
+      position: {
+        x: dragStart.current.posX + deltaX,
+        y: dragStart.current.posY + deltaY,
+      },
+    });
 
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
+    setIsOverTrash(checkDeleteZoneIntersection(noteRef, deleteZoneRef));
+  };
+
+  const handlePointerUp = () => {
+    if (!isDragging.current) return;
+
+    isDragging.current = false;
+
+    const shouldDelete = checkDeleteZoneIntersection(noteRef, deleteZoneRef);
+    setDraggingNoteId(null);
+    setIsOverTrash(false);
+
+    if (shouldDelete) {
+      deleteNote(noteId);
+    }
   };
 
   const handleColorCycle = (e: MouseEvent<HTMLButtonElement>) => {
@@ -92,7 +102,9 @@ export function NoteHeader({
   return (
     <div
       className={styles.noteHeader}
-      onMouseDown={handleDragStart}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
       data-testid="note-header"
     >
       <button
