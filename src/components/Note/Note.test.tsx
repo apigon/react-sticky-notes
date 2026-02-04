@@ -1,12 +1,12 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { Note } from './Note';
-import { NotesProvider } from '../../context/NotesProvider';
-import { Canvas } from '../Canvas/Canvas';
-import type { Note as NoteType } from '../../types';
+import { render, screen, fireEvent } from "@testing-library/react";
+import { Note } from "./Note";
+import { NotesProvider } from "../../context/NotesProvider";
+import { Canvas } from "../Canvas/Canvas";
+import type { Note as NoteType } from "../../types";
 
 const mockNote: NoteType = {
-  id: 'test-note-1',
-  content: 'Test content',
+  id: "test-note-1",
+  content: "Test content",
   position: { x: 100, y: 200 },
   size: { width: 200, height: 150 },
 };
@@ -15,54 +15,55 @@ const renderNote = (note: NoteType = mockNote) => {
   return render(
     <NotesProvider>
       <Note note={note} />
-    </NotesProvider>
+    </NotesProvider>,
   );
 };
 
-describe('Note', () => {
-  it('renders with content', () => {
+describe("Note", () => {
+  it("renders with content", () => {
     renderNote();
-    const textarea = screen.getByTestId('note-content');
-    expect(textarea).toHaveValue('Test content');
+    const textarea = screen.getByTestId("note-content");
+    expect(textarea).toHaveValue("Test content");
   });
 
-  it('renders at correct position and size', () => {
+  it("renders at correct position and size", () => {
     renderNote();
-    const note = screen.getByTestId('note');
+    const note = screen.getByTestId("note");
     expect(note).toHaveStyle({
-      left: '100px',
-      top: '200px',
-      width: '200px',
-      height: '150px',
+      left: "100px",
+      top: "200px",
+      width: "200px",
+      height: "150px",
     });
   });
 
-  it('is draggable', () => {
+  it("is draggable", () => {
     renderNote();
-    const note = screen.getByTestId('note');
-    expect(note).toHaveAttribute('draggable', 'true');
+    const note = screen.getByTestId("note");
+    expect(note).toHaveAttribute("draggable", "true");
   });
 
-  it('updates content when changed', () => {
+  it("updates content when changed", () => {
     // Test with full integration through Canvas
     render(
       <NotesProvider>
         <Canvas />
-      </NotesProvider>
+      </NotesProvider>,
     );
-    const canvas = screen.getByTestId('canvas');
+    const canvas = screen.getByTestId("canvas");
 
     // Create a note by clicking on canvas
     fireEvent.click(canvas, { clientX: 100, clientY: 200 });
 
-    const textarea = screen.getByTestId('note-content');
-    fireEvent.change(textarea, { target: { value: 'New content' } });
+    const textarea = screen.getByTestId("note-content");
+    fireEvent.change(textarea, { target: { value: "New content" } });
 
-    expect(textarea).toHaveValue('New content');
+    expect(textarea).toHaveValue("New content");
   });
 
-  it('sets drag data on drag start', () => {
-    const originalGetBoundingClientRect = Element.prototype.getBoundingClientRect;
+  it("sets drag data on drag start", () => {
+    const originalGetBoundingClientRect =
+      Element.prototype.getBoundingClientRect;
     Element.prototype.getBoundingClientRect = vi.fn(() => ({
       left: 100,
       top: 200,
@@ -76,29 +77,73 @@ describe('Note', () => {
     }));
 
     renderNote();
-    const note = screen.getByTestId('note');
+    const note = screen.getByTestId("note");
     const setData = vi.fn();
 
-    const dragStartEvent = new Event('dragstart', { bubbles: true });
-    Object.defineProperty(dragStartEvent, 'clientX', { value: 120 });
-    Object.defineProperty(dragStartEvent, 'clientY', { value: 220 });
-    Object.defineProperty(dragStartEvent, 'dataTransfer', {
-      value: { setData, effectAllowed: 'move' },
+    const dragStartEvent = new Event("dragstart", { bubbles: true });
+    Object.defineProperty(dragStartEvent, "clientX", { value: 120 });
+    Object.defineProperty(dragStartEvent, "clientY", { value: 220 });
+    Object.defineProperty(dragStartEvent, "dataTransfer", {
+      value: { setData, effectAllowed: "move" },
     });
 
     note.dispatchEvent(dragStartEvent);
 
-    expect(setData).toHaveBeenCalledWith('text/plain', 'test-note-1');
-    expect(setData).toHaveBeenCalledWith('offsetX', '20');
-    expect(setData).toHaveBeenCalledWith('offsetY', '20');
+    expect(setData).toHaveBeenCalledWith("text/plain", "test-note-1");
+    expect(setData).toHaveBeenCalledWith("offsetX", "20");
+    expect(setData).toHaveBeenCalledWith("offsetY", "20");
 
     Element.prototype.getBoundingClientRect = originalGetBoundingClientRect;
   });
 
-  it('renders with placeholder when content is empty', () => {
-    const emptyNote = { ...mockNote, content: '' };
+  it("renders with placeholder when content is empty", () => {
+    const emptyNote = { ...mockNote, content: "" };
     renderNote(emptyNote);
-    const textarea = screen.getByTestId('note-content');
-    expect(textarea).toHaveAttribute('placeholder', 'Type your note...');
+    const textarea = screen.getByTestId("note-content");
+    expect(textarea).toHaveAttribute("placeholder", "Type your note...");
+  });
+
+  describe("resize zones", () => {
+    it("renders all 8 resize zones", () => {
+      const { container } = renderNote();
+
+      const resizeClasses = [
+        "resizeN",
+        "resizeS",
+        "resizeE",
+        "resizeW",
+        "resizeNE",
+        "resizeNW",
+        "resizeSE",
+        "resizeSW",
+      ];
+
+      resizeClasses.forEach((className) => {
+        const element = container.querySelector(`[class*="${className}"]`);
+        expect(element).toBeInTheDocument();
+      });
+    });
+
+    it("when resizing it updates note dimension", () => {
+      render(
+        <NotesProvider>
+          <Canvas />
+        </NotesProvider>,
+      );
+
+      const canvas = screen.getByTestId("canvas");
+      fireEvent.click(canvas, { clientX: 100, clientY: 100 });
+
+      const note = screen.getByTestId("note");
+      const initialWidth = parseInt(note.style.width);
+
+      const resizeHandle = screen.getByTestId("resize-handle");
+      fireEvent.mouseDown(resizeHandle, { clientX: 300, clientY: 200 });
+      fireEvent.mouseMove(document, { clientX: 350, clientY: 200 });
+      fireEvent.mouseUp(document);
+
+      const newWidth = parseInt(note.style.width);
+      expect(newWidth).toBeGreaterThan(initialWidth);
+    });
   });
 });
