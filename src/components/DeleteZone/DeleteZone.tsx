@@ -3,12 +3,12 @@ import styles from "./DeleteZone.module.css";
 
 export function DeleteZone() {
   const {
-    draggingNoteId,
+    dragState,
     deleteZoneRef: deleteZoneRef,
     isOverTrash,
   } = useNotes();
 
-  const isActive = draggingNoteId !== null && isOverTrash;
+  const isActive = dragState !== null && isOverTrash;
 
   return (
     <div

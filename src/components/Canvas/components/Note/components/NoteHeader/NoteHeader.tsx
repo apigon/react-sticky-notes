@@ -28,7 +28,7 @@ export function NoteHeader({
     updateNote,
     deleteNote,
     bringToFront,
-    setDraggingNoteId,
+    setDragState,
     deleteZoneRef,
     setIsOverTrash,
   } = useNotes();
@@ -53,7 +53,7 @@ export function NoteHeader({
       posY: note.position.y,
     };
 
-    setDraggingNoteId(noteId);
+    setDragState({ noteId, isResize: false });
     bringToFront(noteId);
   };
 
@@ -79,7 +79,7 @@ export function NoteHeader({
     isDragging.current = false;
 
     const shouldDelete = checkDeleteZoneIntersection(noteRef, deleteZoneRef);
-    setDraggingNoteId(null);
+    setDragState(null);
     setIsOverTrash(false);
 
     if (shouldDelete) {
@@ -110,6 +110,7 @@ export function NoteHeader({
       <button
         className={styles.colorButton}
         onClick={handleColorCycle}
+        onPointerDown={(e) => e.stopPropagation()}
         style={{ backgroundColor: NOTE_COLORS[color].border }}
         data-testid="color-button"
         aria-label="Change color"
@@ -117,6 +118,7 @@ export function NoteHeader({
       <button
         className={styles.deleteButton}
         onClick={handleDelete}
+        onPointerDown={(e) => e.stopPropagation()}
         data-testid="delete-button"
         aria-label="Delete note"
       >
