@@ -23,6 +23,7 @@ export function NotesProvider({ children }: NotesProviderProps) {
       position,
       size: { width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT },
       zIndex: nextZIndex.current++,
+      color: 'yellow',
     };
     setNotes((prev) => [...prev, newNote]);
   }, []);
