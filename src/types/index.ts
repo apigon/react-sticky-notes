@@ -8,7 +8,7 @@ export interface Size {
   height: number;
 }
 
-export type NoteColor = 'yellow' | 'red' | 'blue' | 'green' | 'gray';
+export type NoteColor = "yellow" | "red" | "blue" | "green" | "gray";
 
 export interface Note {
   id: string;

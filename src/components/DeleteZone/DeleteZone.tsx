@@ -1,14 +1,18 @@
 import { useNotes } from "../../hooks/useNotes";
-import styles from "./TrashZone.module.css";
+import styles from "./DeleteZone.module.css";
 
-export function TrashZone() {
-  const { draggingNoteId, trashZoneRef, isOverTrash } = useNotes();
+export function DeleteZone() {
+  const {
+    draggingNoteId,
+    deleteZoneRef: deleteZoneRef,
+    isOverTrash,
+  } = useNotes();
 
   const isActive = draggingNoteId !== null && isOverTrash;
 
   return (
     <div
-      ref={trashZoneRef}
+      ref={deleteZoneRef}
       className={`${styles.trashZone} ${isActive ? styles.active : ""}`}
       data-testid="trash-zone"
     >

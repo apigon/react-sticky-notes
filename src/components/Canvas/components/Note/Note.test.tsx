@@ -1,8 +1,8 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { Note } from "./Note";
-import { NotesProvider } from "../../context/NotesProvider";
-import { Canvas } from "../Canvas/Canvas";
-import type { Note as NoteType } from "../../types";
+import { NotesProvider } from "../../../../context/NotesProvider";
+import { Canvas } from "../../Canvas";
+import type { Note as NoteType } from "../../../../types";
 
 const mockNote: NoteType = {
   id: "test-note-1",
@@ -10,7 +10,7 @@ const mockNote: NoteType = {
   position: { x: 100, y: 200 },
   size: { width: 200, height: 150 },
   zIndex: 1,
-  color: 'yellow',
+  color: "yellow",
 };
 
 const renderNote = (note: NoteType = mockNote) => {
@@ -57,7 +57,7 @@ describe("Note", () => {
     expect(textarea).toHaveValue("New content");
   });
 
-  it("moves note on mouse drag", () => {
+  it("moves note on pointer drag", () => {
     render(
       <NotesProvider>
         <Canvas />
@@ -71,9 +71,17 @@ describe("Note", () => {
     const initialLeft = parseInt(note.style.left);
     const initialTop = parseInt(note.style.top);
 
-    fireEvent.mouseDown(dragHandle, { clientX: 120, clientY: 120 });
-    fireEvent.mouseMove(document, { clientX: 170, clientY: 170 });
-    fireEvent.mouseUp(document);
+    fireEvent.pointerDown(dragHandle, {
+      clientX: 120,
+      clientY: 120,
+      pointerId: 1,
+    });
+    fireEvent.pointerMove(dragHandle, {
+      clientX: 170,
+      clientY: 170,
+      pointerId: 1,
+    });
+    fireEvent.pointerUp(dragHandle, { pointerId: 1 });
 
     const newLeft = parseInt(note.style.left);
     const newTop = parseInt(note.style.top);
@@ -123,9 +131,17 @@ describe("Note", () => {
       const initialWidth = parseInt(note.style.width);
 
       const resizeHandle = screen.getByTestId("resize-handle");
-      fireEvent.mouseDown(resizeHandle, { clientX: 300, clientY: 200 });
-      fireEvent.mouseMove(document, { clientX: 350, clientY: 200 });
-      fireEvent.mouseUp(document);
+      fireEvent.pointerDown(resizeHandle, {
+        clientX: 300,
+        clientY: 200,
+        pointerId: 1,
+      });
+      fireEvent.pointerMove(resizeHandle, {
+        clientX: 350,
+        clientY: 200,
+        pointerId: 1,
+      });
+      fireEvent.pointerUp(resizeHandle, { pointerId: 1 });
 
       const newWidth = parseInt(note.style.width);
       expect(newWidth).toBeGreaterThan(initialWidth);
