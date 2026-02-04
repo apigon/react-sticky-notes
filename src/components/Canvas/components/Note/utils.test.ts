@@ -3,7 +3,7 @@ import type { RefObject } from "react";
 import {
   calculateResize,
   rectsIntersect,
-  checkTrashIntersection,
+  checkDeleteZoneIntersection,
   MIN_WIDTH,
   MIN_HEIGHT,
   type ResizeState,
@@ -282,7 +282,7 @@ describe("checkTrashIntersection", () => {
       document.createElement("div"),
     );
 
-    expect(checkTrashIntersection(noteRef, trashRef)).toBe(false);
+    expect(checkDeleteZoneIntersection(noteRef, trashRef)).toBe(false);
   });
 
   it("returns false when trashElement is null", () => {
@@ -291,14 +291,14 @@ describe("checkTrashIntersection", () => {
     );
     const trashRef = createMockRef<HTMLDivElement>(null);
 
-    expect(checkTrashIntersection(noteRef, trashRef)).toBe(false);
+    expect(checkDeleteZoneIntersection(noteRef, trashRef)).toBe(false);
   });
 
   it("returns false when both elements are null", () => {
     const noteRef = createMockRef<HTMLDivElement>(null);
     const trashRef = createMockRef<HTMLDivElement>(null);
 
-    expect(checkTrashIntersection(noteRef, trashRef)).toBe(false);
+    expect(checkDeleteZoneIntersection(noteRef, trashRef)).toBe(false);
   });
 
   it("returns true when elements intersect", () => {
@@ -313,7 +313,7 @@ describe("checkTrashIntersection", () => {
     const noteRef = createMockRef(noteEl);
     const trashRef = createMockRef(trashEl);
 
-    expect(checkTrashIntersection(noteRef, trashRef)).toBe(true);
+    expect(checkDeleteZoneIntersection(noteRef, trashRef)).toBe(true);
   });
 
   it("returns false when elements do not intersect", () => {
@@ -328,6 +328,6 @@ describe("checkTrashIntersection", () => {
     const noteRef = createMockRef(noteEl);
     const trashRef = createMockRef(trashEl);
 
-    expect(checkTrashIntersection(noteRef, trashRef)).toBe(false);
+    expect(checkDeleteZoneIntersection(noteRef, trashRef)).toBe(false);
   });
 });

@@ -6,7 +6,7 @@ import { NOTE_COLORS } from "./colors";
 import styles from "./Note.module.css";
 import {
   calculateResize,
-  checkTrashIntersection,
+  checkDeleteZoneIntersection,
   type ResizeDirection,
   type ResizeState,
 } from "./utils";
@@ -54,11 +54,11 @@ export function Note({ note }: NoteProps) {
         },
       });
 
-      setIsOverTrash(checkTrashIntersection(noteRef, deleteZoneRef));
+      setIsOverTrash(checkDeleteZoneIntersection(noteRef, deleteZoneRef));
     };
 
     const handleMouseUp = () => {
-      const shouldDelete = checkTrashIntersection(noteRef, deleteZoneRef);
+      const shouldDelete = checkDeleteZoneIntersection(noteRef, deleteZoneRef);
       isDragging.current = false;
 
       setDraggingNoteId(null);

@@ -73,16 +73,16 @@ export function rectsIntersect(a: DOMRect, b: DOMRect): boolean {
   );
 }
 
-export function checkTrashIntersection(
-  noteElement: RefObject<HTMLDivElement | null>,
-  trashElement: RefObject<HTMLDivElement | null>,
+export function checkDeleteZoneIntersection(
+  noteRef: RefObject<HTMLDivElement | null>,
+  deleteRef: RefObject<HTMLDivElement | null>,
 ) {
-  if (!noteElement.current || !trashElement.current) {
+  if (!noteRef.current || !deleteRef.current) {
     return false;
   }
 
-  const noteRect = noteElement.current.getBoundingClientRect();
-  const trashRect = trashElement.current.getBoundingClientRect();
+  const noteRect = noteRef.current.getBoundingClientRect();
+  const trashRect = deleteRef.current.getBoundingClientRect();
 
   return rectsIntersect(noteRect, trashRect);
 }
