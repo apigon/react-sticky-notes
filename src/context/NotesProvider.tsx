@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, type ReactNode } from "react";
 import type { Note, Position } from "../types";
-import { NotesContext } from "./NotesContext";
+import { NotesContext, type DragState } from "./NotesContext";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 
 const DEFAULT_WIDTH = 200;
@@ -12,8 +12,9 @@ interface NotesProviderProps {
 
 export function NotesProvider({ children }: NotesProviderProps) {
   const [notes, setNotes] = useLocalStorage<Note[]>("sticky-notes", []);
-  const [draggingNoteId, setDraggingNoteId] = useState<string | null>(null);
+  const [dragState, setDragState] = useState<DragState | null>(null);
   const [isOverTrash, setIsOverTrash] = useState(false);
+  const [lastCreatedNoteId, setLastCreatedNoteId] = useState<string | null>(null);
   const deleteZoneRef = useRef<HTMLDivElement | null>(null);
 
   // z-index is used for stacking notes, on drag/edit/resize note is brought to top
@@ -23,8 +24,9 @@ export function NotesProvider({ children }: NotesProviderProps) {
 
   const addNote = useCallback(
     (position: Position) => {
+      const id = crypto.randomUUID();
       const newNote: Note = {
-        id: crypto.randomUUID(),
+        id,
         content: "",
         position,
         size: { width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT },
@@ -32,9 +34,14 @@ export function NotesProvider({ children }: NotesProviderProps) {
         color: "yellow",
       };
       setNotes((prev) => [...prev, newNote]);
+      setLastCreatedNoteId(id);
     },
     [setNotes],
   );
+
+  const clearLastCreatedNoteId = useCallback(() => {
+    setLastCreatedNoteId(null);
+  }, []);
 
   const updateNote = useCallback(
     (id: string, updates: Partial<Note>) => {
@@ -56,6 +63,7 @@ export function NotesProvider({ children }: NotesProviderProps) {
   const deleteNote = useCallback(
     (id: string) => {
       setNotes((prev) => prev.filter((note) => note.id !== id));
+      setLastCreatedNoteId((prev) => (prev === id ? null : prev));
     },
     [setNotes],
   );
@@ -68,11 +76,13 @@ export function NotesProvider({ children }: NotesProviderProps) {
         updateNote,
         deleteNote,
         bringToFront,
-        draggingNoteId,
-        setDraggingNoteId,
+        dragState,
+        setDragState,
         deleteZoneRef,
         isOverTrash,
         setIsOverTrash,
+        lastCreatedNoteId,
+        clearLastCreatedNoteId,
       }}
     >
       {children}

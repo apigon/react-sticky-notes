@@ -1,4 +1,4 @@
-import { useRef, type ChangeEvent, type PointerEvent } from "react";
+import { useRef, useEffect, type ChangeEvent, type PointerEvent } from "react";
 import type { Note as NoteType } from "../../../../types";
 import { useNotes } from "../../../../hooks/useNotes";
 import { NoteHeader } from "./components/NoteHeader";
@@ -15,10 +15,17 @@ interface NoteProps {
 }
 
 export function Note({ note }: NoteProps) {
-  const { updateNote, bringToFront, setDraggingNoteId } = useNotes();
+  const { updateNote, bringToFront, dragState, setDragState, lastCreatedNoteId } = useNotes();
   const noteRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isResizing = useRef(false);
   const resizeState = useRef<ResizeState | null>(null);
+
+  useEffect(() => {
+    if (note.id === lastCreatedNoteId && textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, [note.id, lastCreatedNoteId]);
 
   const handleContentChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     updateNote(note.id, { content: e.target.value });
@@ -31,7 +38,7 @@ export function Note({ note }: NoteProps) {
       e.currentTarget.setPointerCapture(e.pointerId);
 
       isResizing.current = true;
-      setDraggingNoteId(note.id);
+      setDragState({ noteId: note.id, isResize: true });
       bringToFront(note.id);
 
       resizeState.current = {
@@ -60,7 +67,7 @@ export function Note({ note }: NoteProps) {
 
     isResizing.current = false;
     resizeState.current = null;
-    setDraggingNoteId(null);
+    setDragState(null);
   };
 
   const resizeHandleProps = (direction: ResizeDirection) => ({
@@ -69,10 +76,12 @@ export function Note({ note }: NoteProps) {
     onPointerUp: handleResizePointerUp,
   });
 
+  const isDragging = dragState?.noteId === note.id && !dragState.isResize;
+
   return (
     <div
       ref={noteRef}
-      className={styles.note}
+      className={`${styles.note} ${isDragging ? styles.dragging : ""}`}
       style={{
         left: note.position.x,
         top: note.position.y,
@@ -91,6 +100,7 @@ export function Note({ note }: NoteProps) {
         isResizing={isResizing}
       />
       <textarea
+        ref={textareaRef}
         className={styles.content}
         value={note.content}
         onChange={handleContentChange}
