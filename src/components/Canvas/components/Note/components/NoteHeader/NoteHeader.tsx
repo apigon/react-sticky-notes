@@ -1,6 +1,6 @@
 import type { MouseEvent } from "react";
 import type { NoteColor } from "../../../../../../types";
-import { NOTE_COLORS, COLOR_ORDER } from "../../../../../../constants/colors";
+import { NOTE_COLORS, COLOR_ORDER } from "../../colors";
 import styles from "./NoteHeader.module.css";
 
 interface NoteHeaderProps {

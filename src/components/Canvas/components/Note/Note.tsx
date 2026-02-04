@@ -2,7 +2,7 @@ import { useRef, type ChangeEvent, type MouseEvent } from "react";
 import type { Note as NoteType } from "../../../../types";
 import { useNotes } from "../../../../hooks/useNotes";
 import { NoteHeader } from "./components/NoteHeader";
-import { NOTE_COLORS } from "../../../../constants/colors";
+import { NOTE_COLORS } from "./colors";
 import styles from "./Note.module.css";
 import {
   calculateResize,

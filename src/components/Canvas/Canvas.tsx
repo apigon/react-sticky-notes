@@ -1,14 +1,17 @@
 import type { MouseEvent } from "react";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import { useNotes } from "../../hooks/useNotes";
-import { Note } from "../Note/Note";
+import { Note } from "./components/Note";
 import { TrashZone } from "../TrashZone/TrashZone";
 import { Tutorial } from "../Tutorial";
 import styles from "./Canvas.module.css";
 
 export function Canvas() {
   const { notes, addNote, draggingNoteId } = useNotes();
-  const [tutorialSeen, setTutorialSeen] = useLocalStorage("tutorialSeen", false);
+  const [tutorialSeen, setTutorialSeen] = useLocalStorage(
+    "tutorialSeen",
+    false,
+  );
 
   const handleClick = (e: MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget && draggingNoteId === null) {
