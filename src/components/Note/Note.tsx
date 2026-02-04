@@ -17,6 +17,7 @@ export function Note({ note }: NoteProps) {
   const {
     updateNote,
     deleteNote,
+    bringToFront,
     setDraggingNoteId,
     trashZoneRef,
     setIsOverTrash,
@@ -33,6 +34,7 @@ export function Note({ note }: NoteProps) {
     e.preventDefault();
     isDragging.current = true;
     setDraggingNoteId(note.id);
+    bringToFront(note.id);
 
     const startX = e.clientX;
     const startY = e.clientY;
@@ -81,6 +83,8 @@ export function Note({ note }: NoteProps) {
       e.preventDefault();
       e.stopPropagation();
       isResizing.current = true;
+      setDraggingNoteId(note.id);
+      bringToFront(note.id);
 
       const resizeState: ResizeState = {
         startX: e.clientX,
@@ -106,6 +110,7 @@ export function Note({ note }: NoteProps) {
 
       const handleMouseUp = () => {
         isResizing.current = false;
+        setDraggingNoteId(null);
         document.removeEventListener("mousemove", handleMouseMove);
         document.removeEventListener("mouseup", handleMouseUp);
       };
@@ -123,6 +128,7 @@ export function Note({ note }: NoteProps) {
         top: note.position.y,
         width: note.size.width,
         height: note.size.height,
+        zIndex: note.zIndex,
       }}
       data-testid="note"
     >
@@ -135,6 +141,7 @@ export function Note({ note }: NoteProps) {
         className={styles.content}
         value={note.content}
         onChange={handleContentChange}
+        onFocus={() => bringToFront(note.id)}
         placeholder="Type your note..."
         data-testid="note-content"
       />

@@ -13,4 +13,5 @@ export interface Note {
   content: string;
   position: Position;
   size: Size;
+  zIndex: number;
 }

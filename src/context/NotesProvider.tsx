@@ -14,6 +14,7 @@ export function NotesProvider({ children }: NotesProviderProps) {
   const [draggingNoteId, setDraggingNoteId] = useState<string | null>(null);
   const [isOverTrash, setIsOverTrash] = useState(false);
   const trashZoneRef = useRef<HTMLDivElement | null>(null);
+  const nextZIndex = useRef(10);
 
   const addNote = useCallback((position: Position) => {
     const newNote: Note = {
@@ -21,8 +22,16 @@ export function NotesProvider({ children }: NotesProviderProps) {
       content: "",
       position,
       size: { width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT },
+      zIndex: nextZIndex.current++,
     };
     setNotes((prev) => [...prev, newNote]);
+  }, []);
+
+  const bringToFront = useCallback((id: string) => {
+    const newZ = nextZIndex.current++;
+    setNotes((prev) =>
+      prev.map((note) => (note.id === id ? { ...note, zIndex: newZ } : note))
+    );
   }, []);
 
   const updateNote = useCallback((id: string, updates: Partial<Note>) => {
@@ -42,6 +51,7 @@ export function NotesProvider({ children }: NotesProviderProps) {
         addNote,
         updateNote,
         deleteNote,
+        bringToFront,
         draggingNoteId,
         setDraggingNoteId,
         trashZoneRef,

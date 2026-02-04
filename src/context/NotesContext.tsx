@@ -6,6 +6,7 @@ export interface NotesContextValue {
   addNote: (position: Position) => void;
   updateNote: (id: string, updates: Partial<Note>) => void;
   deleteNote: (id: string) => void;
+  bringToFront: (id: string) => void;
   draggingNoteId: string | null;
   setDraggingNoteId: (id: string | null) => void;
   trashZoneRef: RefObject<HTMLDivElement | null>;
