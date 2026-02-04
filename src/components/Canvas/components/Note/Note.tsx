@@ -6,7 +6,6 @@ import { NOTE_COLORS } from "./colors";
 import styles from "./Note.module.css";
 import {
   calculateResize,
-  checkDeleteZoneIntersection,
   type ResizeDirection,
   type ResizeState,
 } from "./utils";
@@ -16,65 +15,9 @@ interface NoteProps {
 }
 
 export function Note({ note }: NoteProps) {
-  const {
-    updateNote,
-    deleteNote,
-    bringToFront,
-    setDraggingNoteId,
-    deleteZoneRef,
-    setIsOverTrash,
-  } = useNotes();
+  const { updateNote, bringToFront, setDraggingNoteId } = useNotes();
   const noteRef = useRef<HTMLDivElement>(null);
   const isResizing = useRef(false);
-  const isDragging = useRef(false);
-
-  const handleDragStart = (e: MouseEvent<HTMLDivElement>) => {
-    if (isResizing.current) {
-      return;
-    }
-
-    e.preventDefault();
-    isDragging.current = true;
-    setDraggingNoteId(note.id);
-    bringToFront(note.id);
-
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const startPosX = note.position.x;
-    const startPosY = note.position.y;
-
-    const handleMouseMove = (moveEvent: globalThis.MouseEvent) => {
-      const deltaX = moveEvent.clientX - startX;
-      const deltaY = moveEvent.clientY - startY;
-
-      updateNote(note.id, {
-        position: {
-          x: startPosX + deltaX,
-          y: startPosY + deltaY,
-        },
-      });
-
-      setIsOverTrash(checkDeleteZoneIntersection(noteRef, deleteZoneRef));
-    };
-
-    const handleMouseUp = () => {
-      const shouldDelete = checkDeleteZoneIntersection(noteRef, deleteZoneRef);
-      isDragging.current = false;
-
-      setDraggingNoteId(null);
-      setIsOverTrash(false);
-
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-
-      if (shouldDelete) {
-        deleteNote(note.id);
-      }
-    };
-
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-  };
 
   const handleContentChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     updateNote(note.id, { content: e.target.value });
@@ -137,10 +80,10 @@ export function Note({ note }: NoteProps) {
       data-testid="note"
     >
       <NoteHeader
+        noteId={note.id}
         color={note.color}
-        onDragStart={handleDragStart}
-        onColorChange={(color) => updateNote(note.id, { color })}
-        onDelete={() => deleteNote(note.id)}
+        noteRef={noteRef}
+        isResizing={isResizing}
       />
       <textarea
         className={styles.content}

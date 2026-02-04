@@ -1,5 +1,3 @@
-import type { RefObject } from "react";
-
 export const MIN_WIDTH = 100;
 export const MIN_HEIGHT = 80;
 
@@ -62,27 +60,4 @@ export function calculateResize(
     size: { width: newWidth, height: newHeight },
     position: { x: newPosX, y: newPosY },
   };
-}
-
-export function rectsIntersect(a: DOMRect, b: DOMRect): boolean {
-  return !(
-    a.right < b.left ||
-    a.left > b.right ||
-    a.bottom < b.top ||
-    a.top > b.bottom
-  );
-}
-
-export function checkDeleteZoneIntersection(
-  noteRef: RefObject<HTMLDivElement | null>,
-  deleteRef: RefObject<HTMLDivElement | null>,
-) {
-  if (!noteRef.current || !deleteRef.current) {
-    return false;
-  }
-
-  const noteRect = noteRef.current.getBoundingClientRect();
-  const trashRect = deleteRef.current.getBoundingClientRect();
-
-  return rectsIntersect(noteRect, trashRect);
 }

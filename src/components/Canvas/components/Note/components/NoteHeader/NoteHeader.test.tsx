@@ -1,51 +1,74 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import { NoteHeader } from "./NoteHeader";
+import { NotesProvider } from "../../../../../../context/NotesProvider";
+import { Canvas } from "../../../../Canvas";
 
 describe("NoteHeader", () => {
-  const defaultProps = {
-    color: "yellow" as const,
-    onDragStart: vi.fn(),
-    onColorChange: vi.fn(),
-    onDelete: vi.fn(),
+  const renderWithNote = () => {
+    render(
+      <NotesProvider>
+        <Canvas />
+      </NotesProvider>,
+    );
+    const canvas = screen.getByTestId("canvas");
+    fireEvent.click(canvas, { clientX: 100, clientY: 100 });
   };
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("renders color button and delete button", () => {
-    render(<NoteHeader {...defaultProps} />);
+    renderWithNote();
     expect(screen.getByTestId("color-button")).toBeInTheDocument();
     expect(screen.getByTestId("delete-button")).toBeInTheDocument();
   });
 
-  it("calls onColorChange with next color when color button clicked", () => {
-    render(<NoteHeader {...defaultProps} />);
+  it("changes note color when color button clicked", () => {
+    renderWithNote();
+    const note = screen.getByTestId("note");
+    const initialBgColor = note.style.backgroundColor;
+
     fireEvent.click(screen.getByTestId("color-button"));
-    expect(defaultProps.onColorChange).toHaveBeenCalledWith("red");
+
+    expect(note.style.backgroundColor).not.toBe(initialBgColor);
   });
 
-  it("cycles back to yellow after gray", () => {
-    render(<NoteHeader {...defaultProps} color="gray" />);
-    fireEvent.click(screen.getByTestId("color-button"));
-    expect(defaultProps.onColorChange).toHaveBeenCalledWith("yellow");
+  it("cycles through all colors and back to yellow", () => {
+    renderWithNote();
+    const colorButton = screen.getByTestId("color-button");
+
+    // Click through all 5 colors (yellow -> red -> blue -> green -> gray -> yellow)
+    for (let i = 0; i < 5; i++) {
+      fireEvent.click(colorButton);
+    }
+
+    const note = screen.getByTestId("note");
+    // Should be back to yellow (rgb(255, 249, 196))
+    expect(note.style.backgroundColor).toBe("rgb(255, 249, 196)");
   });
 
-  it("calls onDelete when delete button clicked", () => {
-    render(<NoteHeader {...defaultProps} />);
+  it("deletes note when delete button clicked", () => {
+    renderWithNote();
+    expect(screen.getByTestId("note")).toBeInTheDocument();
+
     fireEvent.click(screen.getByTestId("delete-button"));
-    expect(defaultProps.onDelete).toHaveBeenCalled();
+
+    expect(screen.queryByTestId("note")).not.toBeInTheDocument();
   });
 
-  it("calls onDragStart when header mousedown", () => {
-    render(<NoteHeader {...defaultProps} />);
-    fireEvent.mouseDown(screen.getByTestId("note-header"));
-    expect(defaultProps.onDragStart).toHaveBeenCalled();
+  it("initiates drag when header mousedown", () => {
+    renderWithNote();
+    const note = screen.getByTestId("note");
+    const header = screen.getByTestId("note-header");
+    const initialLeft = parseInt(note.style.left);
+
+    fireEvent.mouseDown(header, { clientX: 120, clientY: 120 });
+    fireEvent.mouseMove(document, { clientX: 170, clientY: 120 });
+    fireEvent.mouseUp(document);
+
+    expect(parseInt(note.style.left)).toBe(initialLeft + 50);
   });
 
   it("displays color button with correct background color", () => {
-    render(<NoteHeader {...defaultProps} color="blue" />);
+    renderWithNote();
     const colorButton = screen.getByTestId("color-button");
-    expect(colorButton).toHaveStyle({ backgroundColor: "#64b5f6" });
+    // Yellow border color is #f9a825
+    expect(colorButton).toHaveStyle({ backgroundColor: "#f9a825" });
   });
 });
