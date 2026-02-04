@@ -5,10 +5,10 @@ import { TrashZone } from "../TrashZone/TrashZone";
 import styles from "./Canvas.module.css";
 
 export function Canvas() {
-  const { notes, addNote } = useNotes();
+  const { notes, addNote, draggingNoteId } = useNotes();
 
   const handleClick = (e: MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
+    if (e.target === e.currentTarget && draggingNoteId === null) {
       addNote({ x: e.clientX, y: e.clientY });
     }
   };

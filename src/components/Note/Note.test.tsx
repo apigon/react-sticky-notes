@@ -9,6 +9,7 @@ const mockNote: NoteType = {
   content: "Test content",
   position: { x: 100, y: 200 },
   size: { width: 200, height: 150 },
+  zIndex: 1,
 };
 
 const renderNote = (note: NoteType = mockNote) => {
