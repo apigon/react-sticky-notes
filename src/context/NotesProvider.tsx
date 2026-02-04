@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, type ReactNode } from "react";
 import type { Note, Position } from "../types";
 import { NotesContext } from "./NotesContext";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 
 const DEFAULT_WIDTH = 200;
 const DEFAULT_HEIGHT = 150;
@@ -10,40 +11,54 @@ interface NotesProviderProps {
 }
 
 export function NotesProvider({ children }: NotesProviderProps) {
-  const [notes, setNotes] = useState<Note[]>([]);
+  const [notes, setNotes] = useLocalStorage<Note[]>("sticky-notes", []);
   const [draggingNoteId, setDraggingNoteId] = useState<string | null>(null);
   const [isOverTrash, setIsOverTrash] = useState(false);
   const trashZoneRef = useRef<HTMLDivElement | null>(null);
-  const nextZIndex = useRef(10);
+  const nextZIndex = useRef(
+    notes.length > 0 ? Math.max(...notes.map((n) => n.zIndex)) + 1 : 10,
+  );
 
-  const addNote = useCallback((position: Position) => {
-    const newNote: Note = {
-      id: crypto.randomUUID(),
-      content: "",
-      position,
-      size: { width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT },
-      zIndex: nextZIndex.current++,
-      color: 'yellow',
-    };
-    setNotes((prev) => [...prev, newNote]);
-  }, []);
+  const addNote = useCallback(
+    (position: Position) => {
+      const newNote: Note = {
+        id: crypto.randomUUID(),
+        content: "",
+        position,
+        size: { width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT },
+        zIndex: nextZIndex.current++,
+        color: "yellow",
+      };
+      setNotes((prev) => [...prev, newNote]);
+    },
+    [setNotes],
+  );
 
-  const bringToFront = useCallback((id: string) => {
-    const newZ = nextZIndex.current++;
-    setNotes((prev) =>
-      prev.map((note) => (note.id === id ? { ...note, zIndex: newZ } : note))
-    );
-  }, []);
+  const bringToFront = useCallback(
+    (id: string) => {
+      const newZ = nextZIndex.current++;
+      setNotes((prev) =>
+        prev.map((note) => (note.id === id ? { ...note, zIndex: newZ } : note)),
+      );
+    },
+    [setNotes],
+  );
 
-  const updateNote = useCallback((id: string, updates: Partial<Note>) => {
-    setNotes((prev) =>
-      prev.map((note) => (note.id === id ? { ...note, ...updates } : note))
-    );
-  }, []);
+  const updateNote = useCallback(
+    (id: string, updates: Partial<Note>) => {
+      setNotes((prev) =>
+        prev.map((note) => (note.id === id ? { ...note, ...updates } : note)),
+      );
+    },
+    [setNotes],
+  );
 
-  const deleteNote = useCallback((id: string) => {
-    setNotes((prev) => prev.filter((note) => note.id !== id));
-  }, []);
+  const deleteNote = useCallback(
+    (id: string) => {
+      setNotes((prev) => prev.filter((note) => note.id !== id));
+    },
+    [setNotes],
+  );
 
   return (
     <NotesContext.Provider

@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { useNotes } from './useNotes';
-import { NotesProvider } from '../context/NotesProvider';
+import { NotesProvider } from '../../context/NotesProvider';
 import type { ReactNode } from 'react';
 
 const wrapper = ({ children }: { children: ReactNode }) => (
