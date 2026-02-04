@@ -15,5 +15,5 @@ export interface NotesContextValue {
 }
 
 export const NotesContext = createContext<NotesContextValue | undefined>(
-  undefined
+  undefined,
 );

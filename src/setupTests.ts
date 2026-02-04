@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom'
+import "@testing-library/jest-dom";
 
 // Clear localStorage before each test to ensure clean state
 beforeEach(() => {

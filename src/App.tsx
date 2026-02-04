@@ -1,6 +1,6 @@
-import { Canvas } from './components/Canvas/Canvas';
-import { NotesProvider } from './context/NotesProvider';
-import './App.css';
+import { Canvas } from "./components/Canvas/Canvas";
+import { NotesProvider } from "./context/NotesProvider";
+import "./App.css";
 
 function App() {
   return (
