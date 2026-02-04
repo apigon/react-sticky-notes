@@ -1,6 +1,5 @@
 import {
   useRef,
-  useCallback,
   type DragEvent,
   type ChangeEvent,
   type MouseEvent,
@@ -38,7 +37,7 @@ export function Note({ note }: NoteProps) {
     updateNote(note.id, { content: e.target.value });
   };
 
-  const handleResizeStart = useCallback(
+  const handleResizeStart =
     (direction: ResizeDirection) => (e: MouseEvent<HTMLDivElement>) => {
       e.preventDefault();
       e.stopPropagation();
@@ -74,9 +73,7 @@ export function Note({ note }: NoteProps) {
 
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleMouseUp);
-    },
-    [note.id, note.size, note.position, updateNote],
-  );
+    };
 
   return (
     <div
