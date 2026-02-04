@@ -21,7 +21,7 @@ export function Note({ note }: NoteProps) {
     deleteNote,
     bringToFront,
     setDraggingNoteId,
-    trashZoneRef,
+    deleteZoneRef,
     setIsOverTrash,
   } = useNotes();
   const noteRef = useRef<HTMLDivElement>(null);
@@ -54,11 +54,11 @@ export function Note({ note }: NoteProps) {
         },
       });
 
-      setIsOverTrash(checkTrashIntersection(noteRef, trashZoneRef));
+      setIsOverTrash(checkTrashIntersection(noteRef, deleteZoneRef));
     };
 
     const handleMouseUp = () => {
-      const shouldDelete = checkTrashIntersection(noteRef, trashZoneRef);
+      const shouldDelete = checkTrashIntersection(noteRef, deleteZoneRef);
       isDragging.current = false;
 
       setDraggingNoteId(null);

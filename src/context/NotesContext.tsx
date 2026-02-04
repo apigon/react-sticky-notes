@@ -9,7 +9,7 @@ export interface NotesContextValue {
   bringToFront: (id: string) => void;
   draggingNoteId: string | null;
   setDraggingNoteId: (id: string | null) => void;
-  trashZoneRef: RefObject<HTMLDivElement | null>;
+  deleteZoneRef: RefObject<HTMLDivElement | null>;
   isOverTrash: boolean;
   setIsOverTrash: (value: boolean) => void;
 }

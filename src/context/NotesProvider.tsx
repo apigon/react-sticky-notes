@@ -14,7 +14,7 @@ export function NotesProvider({ children }: NotesProviderProps) {
   const [notes, setNotes] = useLocalStorage<Note[]>("sticky-notes", []);
   const [draggingNoteId, setDraggingNoteId] = useState<string | null>(null);
   const [isOverTrash, setIsOverTrash] = useState(false);
-  const trashZoneRef = useRef<HTMLDivElement | null>(null);
+  const deleteZoneRef = useRef<HTMLDivElement | null>(null);
 
   // z-index is used for stacking notes, on drag/edit/resize note is brought to top
   const nextZIndex = useRef(
@@ -70,7 +70,7 @@ export function NotesProvider({ children }: NotesProviderProps) {
         bringToFront,
         draggingNoteId,
         setDraggingNoteId,
-        trashZoneRef,
+        deleteZoneRef,
         isOverTrash,
         setIsOverTrash,
       }}
