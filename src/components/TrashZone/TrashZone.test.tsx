@@ -1,65 +1,69 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { TrashZone } from './TrashZone';
-import { NotesProvider } from '../../context/NotesProvider';
+import { render, screen, fireEvent } from "@testing-library/react";
+import { Canvas } from "../Canvas/Canvas";
+import { NotesProvider } from "../../context/NotesProvider";
 
-const renderTrashZone = () => {
-  return render(
-    <NotesProvider>
-      <TrashZone />
-    </NotesProvider>
-  );
-};
-
-describe('TrashZone', () => {
-  it('renders trash zone', () => {
-    renderTrashZone();
-    expect(screen.getByTestId('trash-zone')).toBeInTheDocument();
-    expect(screen.getByText('Drop to delete')).toBeInTheDocument();
+describe("TrashZone", () => {
+  it("renders trash zone", () => {
+    render(
+      <NotesProvider>
+        <Canvas />
+      </NotesProvider>,
+    );
+    expect(screen.getByTestId("trash-zone")).toBeInTheDocument();
+    expect(screen.getByText("Drop to delete")).toBeInTheDocument();
   });
 
-  it('shows active state on drag over', () => {
-    renderTrashZone();
-    const trashZone = screen.getByTestId('trash-zone');
+  it("deletes note when dropped on trash zone", () => {
+    render(
+      <NotesProvider>
+        <Canvas />
+      </NotesProvider>,
+    );
 
-    fireEvent.dragOver(trashZone);
+    // Create a note
+    const canvas = screen.getByTestId("canvas");
+    fireEvent.click(canvas, { clientX: 100, clientY: 100 });
+    expect(screen.getByTestId("note")).toBeInTheDocument();
 
-    expect(trashZone.className).toMatch(/active/);
-  });
+    // Mock getBoundingClientRect for the trash zone
+    const trashZone = screen.getByTestId("trash-zone");
+    const originalGetBoundingClientRect =
+      Element.prototype.getBoundingClientRect;
+    trashZone.getBoundingClientRect = vi.fn(() => ({
+      left: 500,
+      top: 500,
+      right: 600,
+      bottom: 600,
+      width: 100,
+      height: 100,
+      x: 500,
+      y: 500,
+      toJSON: () => ({}),
+    }));
 
-  it('removes active state on drag leave', () => {
-    renderTrashZone();
-    const trashZone = screen.getByTestId('trash-zone');
+    // Mock getBoundingClientRect for the note to overlap with trash zone
+    const note = screen.getByTestId("note");
+    note.getBoundingClientRect = vi.fn(() => ({
+      left: 520,
+      top: 520,
+      right: 720,
+      bottom: 670,
+      width: 200,
+      height: 150,
+      x: 520,
+      y: 520,
+      toJSON: () => ({}),
+    }));
 
-    fireEvent.dragOver(trashZone);
-    expect(trashZone.className).toMatch(/active/);
+    // Drag note to trash zone
+    const dragHandle = screen.getByTestId("note-header");
+    fireEvent.mouseDown(dragHandle, { clientX: 100, clientY: 100 });
+    fireEvent.mouseMove(document, { clientX: 550, clientY: 550 });
+    fireEvent.mouseUp(document, { clientX: 550, clientY: 550 });
 
-    fireEvent.dragLeave(trashZone);
-    expect(trashZone.className).not.toMatch(/active/);
-  });
+    // Note should be deleted
+    expect(screen.queryByTestId("note")).not.toBeInTheDocument();
 
-  it('calls deleteNote when note is dropped', () => {
-    renderTrashZone();
-    const trashZone = screen.getByTestId('trash-zone');
-
-    fireEvent.drop(trashZone, {
-      dataTransfer: { getData: () => 'note-123' },
-    });
-
-    // TrashZone should handle the drop (no error thrown)
-    expect(trashZone.className).not.toMatch(/active/);
-  });
-
-  it('removes active state after drop', () => {
-    renderTrashZone();
-    const trashZone = screen.getByTestId('trash-zone');
-
-    fireEvent.dragOver(trashZone);
-    expect(trashZone.className).toMatch(/active/);
-
-    fireEvent.drop(trashZone, {
-      dataTransfer: { getData: () => 'note-123' },
-    });
-
-    expect(trashZone.className).not.toMatch(/active/);
+    Element.prototype.getBoundingClientRect = originalGetBoundingClientRect;
   });
 });

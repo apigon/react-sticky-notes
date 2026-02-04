@@ -1,3 +1,5 @@
+import type { RefObject } from "react";
+
 export const MIN_WIDTH = 100;
 export const MIN_HEIGHT = 80;
 
@@ -60,4 +62,27 @@ export function calculateResize(
     size: { width: newWidth, height: newHeight },
     position: { x: newPosX, y: newPosY },
   };
+}
+
+export function rectsIntersect(a: DOMRect, b: DOMRect): boolean {
+  return !(
+    a.right < b.left ||
+    a.left > b.right ||
+    a.bottom < b.top ||
+    a.top > b.bottom
+  );
+}
+
+export function checkTrashIntersection(
+  noteElement: RefObject<HTMLDivElement | null>,
+  trashElement: RefObject<HTMLDivElement | null>,
+) {
+  if (!noteElement.current || !trashElement.current) {
+    return false;
+  }
+
+  const noteRect = noteElement.current.getBoundingClientRect();
+  const trashRect = trashElement.current.getBoundingClientRect();
+
+  return rectsIntersect(noteRect, trashRect);
 }

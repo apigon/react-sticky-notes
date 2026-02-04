@@ -1,36 +1,75 @@
-import {
-  useRef,
-  type DragEvent,
-  type ChangeEvent,
-  type MouseEvent,
-} from "react";
+import { useRef, type ChangeEvent, type MouseEvent } from "react";
 import type { Note as NoteType } from "../../types";
 import { useNotes } from "../../hooks/useNotes";
 import styles from "./Note.module.css";
 import {
   calculateResize,
+  checkTrashIntersection,
   type ResizeDirection,
   type ResizeState,
-} from "./resize";
+} from "./utils";
 
 interface NoteProps {
   note: NoteType;
 }
 
 export function Note({ note }: NoteProps) {
-  const { updateNote } = useNotes();
+  const {
+    updateNote,
+    deleteNote,
+    setDraggingNoteId,
+    trashZoneRef,
+    setIsOverTrash,
+  } = useNotes();
+  const noteRef = useRef<HTMLDivElement>(null);
   const isResizing = useRef(false);
+  const isDragging = useRef(false);
 
-  const handleDragStart = (e: DragEvent<HTMLDivElement>) => {
+  const handleDragStart = (e: MouseEvent<HTMLDivElement>) => {
     if (isResizing.current) {
-      e.preventDefault();
       return;
     }
-    const rect = e.currentTarget.getBoundingClientRect();
-    e.dataTransfer.setData("text/plain", note.id);
-    e.dataTransfer.setData("offsetX", String(e.clientX - rect.left));
-    e.dataTransfer.setData("offsetY", String(e.clientY - rect.top));
-    e.dataTransfer.effectAllowed = "move";
+
+    e.preventDefault();
+    isDragging.current = true;
+    setDraggingNoteId(note.id);
+
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startPosX = note.position.x;
+    const startPosY = note.position.y;
+
+    const handleMouseMove = (moveEvent: globalThis.MouseEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      const deltaY = moveEvent.clientY - startY;
+
+      updateNote(note.id, {
+        position: {
+          x: startPosX + deltaX,
+          y: startPosY + deltaY,
+        },
+      });
+
+      setIsOverTrash(checkTrashIntersection(noteRef, trashZoneRef));
+    };
+
+    const handleMouseUp = () => {
+      const shouldDelete = checkTrashIntersection(noteRef, trashZoneRef);
+      isDragging.current = false;
+
+      setDraggingNoteId(null);
+      setIsOverTrash(false);
+
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+
+      if (shouldDelete) {
+        deleteNote(note.id);
+      }
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
   };
 
   const handleContentChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -77,6 +116,7 @@ export function Note({ note }: NoteProps) {
 
   return (
     <div
+      ref={noteRef}
       className={styles.note}
       style={{
         left: note.position.x,
@@ -84,10 +124,13 @@ export function Note({ note }: NoteProps) {
         width: note.size.width,
         height: note.size.height,
       }}
-      draggable
-      onDragStart={handleDragStart}
       data-testid="note"
     >
+      <div
+        className={styles.noteHeader}
+        onMouseDown={handleDragStart}
+        data-testid="note-header"
+      />
       <textarea
         className={styles.content}
         value={note.content}
